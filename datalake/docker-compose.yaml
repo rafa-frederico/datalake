@@ -40,17 +40,15 @@
 ---
 
 
-version: '3'
-
-  
+version: '3.8'
 
 x-airflow-common:
   &airflow-common
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.3.4}
-  # build: .
+  # image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.3.4}
+  build: . # <-- Já está descomentado aqui
   environment:
     &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
@@ -64,6 +62,12 @@ x-airflow-common:
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth'
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    # --- Adição para o Spark: Configurações do Airflow para Spark ---
+    # Necessário para o SparkSubmitOperator se conectar ao Spark Master
+    AIRFLOW_CONNECTIONS: '{"spark_default": {"conn_id": "spark_default", "conn_type": "spark", "host": "spark-master", "port": "7077", "extra": {"spark_home": "/opt/spark"}}}'
+    # Você pode adicionar AIRFLOW__CORE__PLUGINS_FOLDER ou AIRFLOW__CORE__DAGS_FOLDER aqui
+    # se você tiver DAGs que precisam ser descobertos ou plugins.
+    # Ex: AIRFLOW__CORE__DAGS_FOLDER=/opt/airflow/dags
   volumes:
     - ./dags:/opt/airflow/dags
     - ./logs:/opt/airflow/logs
@@ -74,6 +78,8 @@ x-airflow-common:
     redis:
       condition: service_healthy
     postgres:
+      condition: service_healthy
+    spark-master: # <-- Adicionado dependência do Spark Master
       condition: service_healthy
 
 services:
@@ -114,6 +120,49 @@ services:
     ports:
       - "9000:9000" # S3 API port
       - "9001:9001" # MinIO Console port
+
+  # --- Adição para o Spark: Master e Worker ---
+  spark-master:
+    image: bitnami/spark:3.3.2 # Escolha uma versão do Spark compatível com seu PySpark
+    command: /opt/bitnami/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    ports:
+      - "8080:8080" # Spark Master UI
+      - "7077:7077" # Spark Master Port
+    environment:
+      SPARK_MODE: master
+      SPARK_RPC_AUTHENTICATION_ENABLED: no
+      SPARK_RPC_ENCRYPTION_ENABLED: no
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
+      SPARK_SSL_ENABLED: no
+    volumes:
+      # Opcional: Mapear um diretório para logs ou dados do Spark
+      - spark-data:/opt/bitnami/spark/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080"] # Verifica a UI do Spark Master
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s # Tempo para o serviço iniciar antes de começar os testes
+
+  spark-worker:
+    image: bitnami/spark:3.3.2 # Deve ser a mesma imagem do master
+    command: /opt/bitnami/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+    environment:
+      SPARK_MODE: worker
+      SPARK_MASTER_URL: spark://spark-master:7077
+      SPARK_WORKER_CORES: 1 # Ajuste conforme necessário
+      SPARK_WORKER_MEMORY: 1G # Ajuste conforme necessário
+      SPARK_RPC_AUTHENTICATION_ENABLED: no
+      SPARK_RPC_ENCRYPTION_ENABLED: no
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
+      SPARK_SSL_ENABLED: no
+    volumes:
+      - spark-data:/opt/bitnami/spark/data
+    depends_on:
+      spark-master:
+        condition: service_healthy
+    restart: on-failure # Reinicia o worker se ele falhar
+  # --- Fim da Adição para o Spark ---
 
   airflow-webserver:
     <<: *airflow-common
@@ -292,8 +341,7 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
-  
-
 volumes:
   postgres-db-volume:
-  minio:
+  minio_data:
+  spark-data: # <-- Novo volume para persistir dados do Spark, se necessário
