@@ -20,7 +20,7 @@ RUN pip install --no-cache-dir apache-airflow-providers-microsoft-azure
 RUN pip install --no-cache-dir pyspark==3.3.2 # Ou a versão que você for usar
 # RUN pip install --no-cache-dir findspark # Opcional, se precisar do findspark em suas DAGs
 
-
+RUN pip install --no-cache-dir azure-servicebus
 # (Opcional) Instale quaisquer outras dependências Python que suas DAGs possam precisar
 # Exemplo:
 # RUN pip install --no-cache-dir pandas requests
@@ -40,3 +40,25 @@ USER airflow
 # os componentes do Airflow (scheduler, webserver, etc.) com base nas variáveis
 # de ambiente e argumentos passados. Não é necessário redefinir aqui,
 # a menos que você tenha uma necessidade muito específica.
+
+
+# Use an official MinIO base image
+FROM minio/minio:latest
+
+# Set environment variables for MinIO root user and password
+# IMPORTANT: Replace with strong, secure credentials in a production environment
+ENV MINIO_ROOT_USER="minioadmin"
+ENV MINIO_ROOT_PASSWORD="minioadmin"
+
+# Define the data directory for MinIO
+VOLUME /data
+
+# Expose the default MinIO server port (9000) and console port (9001)
+EXPOSE 9000
+EXPOSE 9001
+
+# Command to run MinIO server
+# Ensure the data directory is passed to the MinIO command
+CMD ["minio", "server", "/data"]
+
+RUN pip install --no-cache-dir minio
