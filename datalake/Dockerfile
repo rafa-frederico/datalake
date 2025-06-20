@@ -5,7 +5,7 @@ FROM minio/minio
 RUN pip install --upgrade pip
 RUN pip install minio
 
-FROM apache/airflow:2.10.4-python3.12
+FROM apache/airflow:2.3.4
 
 # Define o usuário para root temporariamente para instalar pacotes extras
 # Isso é necessário porque a imagem do Airflow por padrão executa como usuário `airflow`
