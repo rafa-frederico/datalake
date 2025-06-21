@@ -5,26 +5,15 @@ from datetime import datetime
 from pyspark.sql import SparkSession
 
 def upload_file_to_minio():
-    s3_hook = S3Hook(aws_conn_id='minio_s3_conn') # Usa a conexão que você configurou
-    bucket_name = 'silver'
-    key = 'data/example.txt'
-    file_content = 'Hello from Airflow to MinIO!'
+    # Caminho de saída no MinIO
+    # O formato é s3a://<nome_do_bucket>/<caminho_no_bucket>
+    output_path = "s3a://localhost:9001/bronze"
+    # Caminho de saída no MinIO
 
-    # Cria o bucket se ele não existir
-    if not s3_hook.check_for_bucket(bucket_name):
-        s3_hook.create_bucket(bucket_name)
 
-    # Carrega o arquivo
-    s3_hook.load_string(string_data=file_content, key=key, bucket_name=bucket_name, replace=True)
-    print(f"File '{key}' uploaded to bucket '{bucket_name}' in MinIO.")
 
-def download_file_from_minio():
-    s3_hook = S3Hook(aws_conn_id='minio_s3_conn')
-    bucket_name = 'bronze'
-    key = 'data/example.txt'
 
-    file_content = s3_hook.read_key(key=key, bucket_name=bucket_name)
-    print(f"Content of '{key}':\n{file_content}")
+
 
 def leApi():
     import requests
@@ -42,8 +31,53 @@ def leApi():
         .getOrCreate()
     df = spark.read.json(spark.sparkContext.parallelize(data))
     df.show()
+    return df 
 
 
+def gravarBronze():
+    # Cria uma sessão Spark
+    spark = SparkSession.builder \
+        .appName("Upload to MinIO") \
+        .getOrCreate()
+
+    # Lê o DataFrame do arquivo JSON
+    df = leApi()
+
+    # Grava o DataFrame no MinIO
+    df.write.mode("overwrite").parquet("s3a://localhost:9001/bronze")
+
+    # Fecha a sessão Spark
+    spark.stop()
+
+def gravarSilver():
+    # Cria uma sessão Spark
+    spark = SparkSession.builder \
+        .appName("Upload to MinIO") \
+        .getOrCreate()
+
+    # Lê o DataFrame do arquivo JSON
+    df = leApi()
+
+    # Grava o DataFrame no MinIO
+    df.write.mode("overwrite").parquet("s3a://localhost:9001/silver")
+
+    # Fecha a sessão Spark
+    spark.stop()
+
+def gravarGold():
+    # Cria uma sessão Spark
+    spark = SparkSession.builder \
+        .appName("Upload to MinIO") \
+        .getOrCreate()
+
+    # Lê o DataFrame do arquivo JSON
+    df = leApi()
+
+    # Grava o DataFrame no MinIO
+    df.write.mode("overwrite").parquet("s3a://localhost:9001/gold")
+
+    # Fecha a sessão Spark
+    spark.stop()
 
 with DAG(
     dag_id='dag_upload_minio',
@@ -55,9 +89,15 @@ with DAG(
         task_id='upload_file',
         python_callable=upload_file_to_minio,
     )
-    leApi = PythonOperator( task_id='leApi',
-        python_callable=leApi(),
+    gravarBronze = PythonOperator( task_id='gravarBronze',
+        python_callable=gravarBronze
+    )
+    gravarSilver = PythonOperator( task_id='gravarSilver',
+        python_callable=gravarSilver
+    )
+    gravarGold = PythonOperator( task_id='gravarGold',
+        python_callable=gravarGold
     )
 
 
-    leApi >>upload_task 
+    gravarBronze >> gravarSilver >> gravarGold 
