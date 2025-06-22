@@ -1,0 +1,41 @@
+FROM apache/airflow:2.10.4 
+
+# Instala o provedor Apache Spark para Airflow
+RUN pip install apache-airflow-providers-apache-spark 
+
+USER root 
+RUN apt-get update 
+RUN apt-get install -y --no-install-recommends openjdk-17-jdk 
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* 
+
+# Define variáveis de ambiente para o Spark client dentro do Airflow
+ENV SPARK_HOME="/home/sparkuser/spark" 
+ENV JAVA_HOME="/usr/lib/jvm/java-17-openjdk-amd64" 
+ENV PATH="${JAVA_HOME}:${SPARK_HOME}/bin:${SPARK_HOME}/sbin:${PATH}" 
+
+# Variáveis para o Spark Master (referem-se ao serviço Spark Master no docker-compose)
+ENV SPARK_MASTER_PORT="7077" 
+ENV SPARK_MASTER_HOST="spark-master" 
+
+# Cria o diretório SPARK_HOME
+RUN mkdir -p ${SPARK_HOME} 
+
+# Baixa e extrai a distribuição do Apache Spark (para ter as ferramentas cliente como spark-submit)
+# Se precisar de uma versão mais recente, atualize o link.
+RUN curl https://dlcdn.apache.org/spark/spark-4.0.0/spark-4.0.0-bin-hadoop3.tgz -o spark-4.0.0-bin-hadoop3.tgz \
+    && tar xvzf spark-4.0.0-bin-hadoop3.tgz --directory ${SPARK_HOME} --strip-components 1 \
+    && rm -rf spark-4.0.0-bin-hadoop3.tgz 
+
+
+# Cria um usuário sparkuser e ajusta permissões
+RUN useradd -u 1000 -m -d /home/sparkuser sparkuser 
+ENV HOME="/home/sparkuser" 
+RUN chown -R airflow:sparkuser ${SPARK_HOME} 
+
+RUN apt update 
+RUN apt-get -y install procps 
+
+# Copia configurações customizadas do Spark para o cliente no Airflow
+COPY ./spark-defaults.conf "${SPARK_HOME}/conf" 
+
+USER airflow 

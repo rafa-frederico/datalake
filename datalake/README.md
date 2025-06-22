@@ -10,21 +10,9 @@ git clone https://github.com/rafa-frederico/datalake.git
 
   docker compose up -d
 
-3) Instalar JAVA_HOME para o Airflow no MAC
-brew install --cask temurin
-
-4) Identificar o JAVA_HOME no MAC
-/usr/libexec/java_home
-<</Library/Java/JavaVirtualMachines/temurin-24.jdk/Contents/Home>>
-
-5) criar ambiente virtual python
-
-6) instalar minio
-pip install minio
-
-7) instalar pyspark
-pip install pyspark
-
+3) Caso seja necessário , gerar o fernet_key através do programa gerador_fernet_key.py
+Alterar o docker-composer.yaml.
+4)configurar o spark no airflow 
 
 
 

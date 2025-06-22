@@ -1,0 +1,93 @@
+[2025-06-22T17:37:15.834+0000] {local_task_job_runner.py:123} INFO - ::group::Pre task execution logs
+[2025-06-22T17:37:15.843+0000] {taskinstance.py:2613} INFO - Dependencies all met for dep_context=non-requeueable deps ti=<TaskInstance: spark.AccumulatorMetricsClient manual__2025-06-22T17:37:14.950013+00:00 [queued]>
+[2025-06-22T17:37:15.846+0000] {taskinstance.py:2613} INFO - Dependencies all met for dep_context=requeueable deps ti=<TaskInstance: spark.AccumulatorMetricsClient manual__2025-06-22T17:37:14.950013+00:00 [queued]>
+[2025-06-22T17:37:15.846+0000] {taskinstance.py:2866} INFO - Starting attempt 1 of 1
+[2025-06-22T17:37:15.851+0000] {taskinstance.py:2889} INFO - Executing <Task(SparkSubmitOperator): AccumulatorMetricsClient> on 2025-06-22 17:37:14.950013+00:00
+[2025-06-22T17:37:15.854+0000] {warnings.py:112} WARNING - /home/***/.local/lib/python3.12/site-packages/***/task/task_runner/standard_task_runner.py:70: DeprecationWarning: This process (pid=467) is multi-threaded, use of fork() may lead to deadlocks in the child.
+  pid = os.fork()
+
+[2025-06-22T17:37:15.856+0000] {standard_task_runner.py:72} INFO - Started process 468 to run task
+[2025-06-22T17:37:15.855+0000] {standard_task_runner.py:104} INFO - Running: ['***', 'tasks', 'run', 'spark', 'AccumulatorMetricsClient', 'manual__2025-06-22T17:37:14.950013+00:00', '--job-id', '3', '--raw', '--subdir', 'DAGS_FOLDER/dag_teste.py', '--cfg-path', '/tmp/tmpkepn3b7a']
+[2025-06-22T17:37:15.857+0000] {standard_task_runner.py:105} INFO - Job 3: Subtask AccumulatorMetricsClient
+[2025-06-22T17:37:15.874+0000] {task_command.py:467} INFO - Running <TaskInstance: spark.AccumulatorMetricsClient manual__2025-06-22T17:37:14.950013+00:00 [running]> on host 471b9cf41a45
+[2025-06-22T17:37:15.903+0000] {taskinstance.py:3132} INFO - Exporting env vars: AIRFLOW_CTX_DAG_OWNER='***' AIRFLOW_CTX_DAG_ID='spark' AIRFLOW_CTX_TASK_ID='AccumulatorMetricsClient' AIRFLOW_CTX_EXECUTION_DATE='2025-06-22T17:37:14.950013+00:00' AIRFLOW_CTX_TRY_NUMBER='1' AIRFLOW_CTX_DAG_RUN_ID='manual__2025-06-22T17:37:14.950013+00:00'
+[2025-06-22T17:37:15.903+0000] {taskinstance.py:731} INFO - ::endgroup::
+[2025-06-22T17:37:15.924+0000] {spark_submit.py:305} INFO - Could not load connection string spark_standalone_client, defaulting to yarn
+[2025-06-22T17:37:15.924+0000] {spark_submit.py:474} INFO - Spark-Submit cmd: spark-submit --master yarn --total-executor-cores 2 --executor-cores 2 --name arrow-spark --class org.apache.spark.examples.AccumulatorMetricsTest --verbose /opt/spark/examples/jars/spark-examples_2.12-4.0.0.jar
+[2025-06-22T17:37:15.934+0000] {spark_submit.py:644} INFO - /home/sparkuser/spark/bin/spark-class: line 71: /usr/lib/jvm/java-17-openjdk-amd64/bin/java: No such file or directory
+[2025-06-22T17:37:15.934+0000] {spark_submit.py:644} INFO - /home/sparkuser/spark/bin/spark-class: line 97: CMD: bad array subscript
+[2025-06-22T17:37:15.939+0000] {taskinstance.py:3311} ERROR - Task failed with exception
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 767, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 733, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 422, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/apache/spark/operators/spark_submit.py", line 197, in execute
+    self._hook.submit(self.application)
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/apache/spark/hooks/spark_submit.py", line 566, in submit
+    raise AirflowException(
+airflow.exceptions.AirflowException: Cannot execute: spark-submit --master yarn --total-executor-cores 2 --executor-cores 2 --name arrow-spark --class org.apache.spark.examples.AccumulatorMetricsTest --verbose /opt/spark/examples/jars/spark-examples_2.12-4.0.0.jar. Error code is: 1.
+[2025-06-22T17:37:15.942+0000] {taskinstance.py:1225} INFO - Marking task as FAILED. dag_id=spark, task_id=AccumulatorMetricsClient, run_id=manual__2025-06-22T17:37:14.950013+00:00, execution_date=20250622T173714, start_date=20250622T173715, end_date=20250622T173715
+[2025-06-22T17:37:15.947+0000] {taskinstance.py:340} INFO - ::group::Post task execution logs
+[2025-06-22T17:37:15.947+0000] {standard_task_runner.py:124} ERROR - Failed to execute job 3 for task AccumulatorMetricsClient (Cannot execute: spark-submit --master yarn --total-executor-cores 2 --executor-cores 2 --name arrow-spark --class org.apache.spark.examples.AccumulatorMetricsTest --verbose /opt/spark/examples/jars/spark-examples_2.12-4.0.0.jar. Error code is: 1.; 468)
+Traceback (most recent call last):
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/task/task_runner/standard_task_runner.py", line 117, in _start_by_fork
+    ret = args.func(args, dag=self.dag)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/cli_config.py", line 49, in command
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/cli.py", line 116, in wrapper
+    return f(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 483, in task_run
+    task_return_code = _run_task_by_selected_method(args, _dag, ti)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 256, in _run_task_by_selected_method
+    return _run_raw_task(args, ti)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/cli/commands/task_command.py", line 341, in _run_raw_task
+    return ti._run_raw_task(
+           ^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/session.py", line 97, in wrapper
+    return func(*args, session=session, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3005, in _run_raw_task
+    return _run_raw_task(
+           ^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 273, in _run_raw_task
+    TaskInstance._execute_task_with_callbacks(
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3159, in _execute_task_with_callbacks
+    result = self._execute_task(context, task_orig)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 3183, in _execute_task
+    return _execute_task(self, context, task_orig)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 767, in _execute_task
+    result = _execute_callable(context=context, **execute_callable_kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/taskinstance.py", line 733, in _execute_callable
+    return ExecutionCallableRunner(
+           ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/utils/operator_helpers.py", line 252, in run
+    return self.func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/models/baseoperator.py", line 422, in wrapper
+    return func(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/apache/spark/operators/spark_submit.py", line 197, in execute
+    self._hook.submit(self.application)
+  File "/home/airflow/.local/lib/python3.12/site-packages/airflow/providers/apache/spark/hooks/spark_submit.py", line 566, in submit
+    raise AirflowException(
+airflow.exceptions.AirflowException: Cannot execute: spark-submit --master yarn --total-executor-cores 2 --executor-cores 2 --name arrow-spark --class org.apache.spark.examples.AccumulatorMetricsTest --verbose /opt/spark/examples/jars/spark-examples_2.12-4.0.0.jar. Error code is: 1.
+[2025-06-22T17:37:15.960+0000] {local_task_job_runner.py:266} INFO - Task exited with return code 1
+[2025-06-22T17:37:15.966+0000] {taskinstance.py:3895} INFO - 0 downstream tasks scheduled from follow-on schedule check
+[2025-06-22T17:37:15.967+0000] {local_task_job_runner.py:245} INFO - ::endgroup::
